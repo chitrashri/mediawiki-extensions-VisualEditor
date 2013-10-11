@@ -534,7 +534,7 @@ ve.init.mw.Target.prototype.load = function () {
 	} );
 
 	this.loading.done( function ( data, status, jqxhr ) {
-		ve.track( 'DOM retrieved', {
+		ve.track( 'performance.parsoid.domLoad', {
 			'bytes': $.byteLength( jqxhr.responseText ),
 			'duration': ve.now() - start,
 			'cacheHit': /hit/i.test( jqxhr.getResponseHeader( 'X-Cache' ) ),
@@ -561,12 +561,13 @@ ve.init.mw.Target.prototype.load = function () {
  * @returns {boolean} Saving has been started
 */
 ve.init.mw.Target.prototype.save = function ( doc, options ) {
+	var data, start;
 	// Prevent duplicate requests
 	if ( this.saving ) {
 		return false;
 	}
 
-	var data = $.extend( {}, options, {
+	data = $.extend( {}, options, {
 		'format': 'json',
 		'action': 'visualeditoredit',
 		'page': this.pageName,
@@ -578,8 +579,9 @@ ve.init.mw.Target.prototype.save = function ( doc, options ) {
 	} );
 
 	// Save DOM
-	this.saving = true;
-	$.ajax( {
+	start = ve.now();
+
+	this.saving = $.ajax( {
 		'url': this.apiUrl,
 		'data': data,
 		'dataType': 'json',
@@ -589,6 +591,15 @@ ve.init.mw.Target.prototype.save = function ( doc, options ) {
 		'success': ve.bind( ve.init.mw.Target.onSave, this ),
 		'error': ve.bind( ve.init.mw.Target.onSaveError, this )
 	} );
+
+	this.saving.done( function ( data, status, jqxhr ) {
+		ve.track( 'performance.parsoid.domSave', {
+			'bytes': $.byteLength( jqxhr.responseText ),
+			'duration': ve.now() - start,
+			'parsoid': jqxhr.getResponseHeader( 'X-Parsoid-Performance' )
+		} );
+	} );
+
 	return true;
 };
 
