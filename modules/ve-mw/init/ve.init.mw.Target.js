@@ -37,6 +37,11 @@ ve.init.mw.Target = function VeInitMwTarget( $container, pageName, revisionId ) 
 	this.submitUrl = ( new mw.Uri( mw.util.getUrl( this.pageName ) ) )
 		.extend( { 'action': 'submit' } );
 
+	/**
+	 * @property {ve.ui.Surface}
+	 */
+	this.surface = null;
+
 	this.modules = [
 			'ext.visualEditor.core',
 			'ext.visualEditor.data'
@@ -68,6 +73,12 @@ ve.init.mw.Target = function VeInitMwTarget( $container, pageName, revisionId ) 
 };
 
 /**
+ * Fired when the #surface is ready.
+ *
+ * By default the surface document is not focussed. If the target wants
+ * the browsers' focus to be in the surface (ready for typing and cursoring)
+ * call `this.$document[0].focus();` in a handler for this event.
+ *
  * @event surfaceReady
  */
 
@@ -310,7 +321,6 @@ ve.init.mw.Target.prototype.onReady = function () {
 	this.edited = false;
 	this.setUpSurface( this.doc, ve.bind( function() {
 		this.startSanityCheck();
-		this.$document[0].focus();
 		this.emit( 'surfaceReady' );
 	}, this ) );
 };
@@ -1070,7 +1080,7 @@ ve.init.mw.Target.prototype.setUpSurface = function ( doc, callback ) {
 		var dmDoc = ve.dm.converter.getModelFromDom( doc );
 		setTimeout( function () {
 			// Create ui.Surface (also creates ce.Surface and dm.Surface and builds CE tree)
-			target.surface = new ve.ui.Surface( dmDoc, target.surfaceOptions );
+			target.surface = new ve.ui.Surface( dmDoc );
 			target.surface.$element.addClass( 've-init-mw-viewPageTarget-surface' );
 			setTimeout( function () {
 				// Initialize surface
@@ -1078,6 +1088,7 @@ ve.init.mw.Target.prototype.setUpSurface = function ( doc, callback ) {
 				target.$document = target.surface.$element.find( '.ve-ce-documentNode' );
 				target.$element.append( target.surface.$element );
 				target.setUpToolbar();
+
 				target.$document.attr( {
 					'lang': mw.config.get( 'wgVisualEditor' ).pageLanguageCode,
 					'dir': mw.config.get( 'wgVisualEditor' ).pageLanguageDir
