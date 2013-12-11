@@ -770,7 +770,14 @@ ve.ce.Surface.prototype.onPaste = function ( e ) {
 	}
 	this.pasting = true;
 	this.beforePaste( e );
-	setTimeout( ve.bind( this.afterPaste, this, e ) );
+	setTimeout( ve.bind( function () {
+		this.afterPaste( e );
+
+		// Allow pasting again
+		this.pasting = false;
+		this.pasteSpecial = false;
+		this.beforePasteData = null;
+	}, this ) );
 };
 
 /**
@@ -1067,11 +1074,6 @@ ve.ce.Surface.prototype.afterPaste = function () {
 	this.model.change( tx, new ve.Range( selection.start ) );
 	// Move cursor to end of selection
 	this.model.setSelection( new ve.Range( selection.end ) );
-
-	// Allow pasting again
-	this.pasting = false;
-	this.pasteSpecial = false;
-	this.beforePasteData = null;
 };
 
 /**
