@@ -50,6 +50,20 @@ Then(/^a non\-existing link appears in the diff view$/) do
   end
 end
 
+Then(/^an interwiki link appears in the diff view$/) do
+  on(VisualEditorPage) do |page|
+    page.wait_until(10) do
+      page.links_diff_view.include? "Wikipedia:Wikipedian"
+    end
+    page.links_diff_view.should match Regexp.escape("[[Wikipedia:Wikipedian|Editing]]")
+  end
+end
+
+When(/^I click the blue text for Matching Page$/) do
+  on(VisualEditorPage).internal_linksuggestion_element.when_present.click
+end
+
+
 When(/^I enter (.+) into link Content box$/) do |content|
   on(VisualEditorPage) do |page|
     page.link_textfield_element.when_present
