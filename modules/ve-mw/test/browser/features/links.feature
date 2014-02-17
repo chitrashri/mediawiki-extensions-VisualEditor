@@ -33,3 +33,12 @@ Feature: VisualEditor Links
     And I click Save page
     And I click Links Review your changes
     Then a non-existing link appears in the diff view
+
+  Scenario: Enter Interwiki link
+    Given I can see the Link User Interface
+    When I enter Interwiki link into link Content box
+    And I click the blue text for Matching Page
+    And I click < to close Link User Inteface
+    And I click Save page
+    And I click Links Review your changes
+    Then a Interwiki link appears in the diff view
